@@ -1,0 +1,68 @@
+#Симакова Инна 403 дз4
+
+N   = 32
+eps = 0.01
+
+function retval = A(x1, x2, x3, x4)
+    retval = (x1 + x2 + x3 + x4)^2;
+endfunction
+
+function retval = col(x1, x2, x3, size)
+    retval = arrayfun(@A, [1: size]', x1, x2, x3);
+endfunction
+
+function retval = flatten(size)
+    F = [];
+    for i = 1: size
+        for j = 1: size
+            for k = 1: size
+                F = [F, col(i, j, k, size)];    
+            endfor
+        endfor
+    endfor
+    retval = F;
+endfunction
+
+function retval = rank(vector, size, eps)
+    for i = 1: size
+        if (vector(i) < eps)
+            break;
+        endif
+    endfor
+    retval = i - 1;
+endfunction
+
+#------------main-------------------
+
+F1_1_234 = flatten(N);
+A = reshape(F1_1_234, N, N, N, N);
+[U, S, V] = svd(F1_1_234, "econ");
+diag(S)
+R1 = approx_rank(diag(S), N, eps)
+
+G1 = U(:, 1:R1);
+
+F2_a1_234 = S(1:R1, 1:R1) * V(:, 1:R1)';
+A2 = reshape(F2_a1_234, R1, N, N, N);
+F2_a12_34 = reshape(A2, R1 * N, N^2);
+[U, S, V] = svd(F2_a12_34, "econ");
+diag(S)
+R2 = approx_rank(diag(S), R1 * N, eps)
+U2 = U(:, 1:R2);
+
+G2 = reshape(U2, R1, N, R2);
+
+F3_a2_34 = S(1:R2, 1:R2) * V(:, 1:R2)';
+A3 = reshape(F3_a2_34, R2, N, N);
+F3_a23_4 = reshape(A3, R2 * N, N);
+[U, S, V] = svd(F3_a23_4, "econ");
+diag(S)
+R3 = approx_rank(diag(S), N, eps)
+U3 = U(:, 1:R3);
+
+G3 = reshape(U3, R2, N, R3);
+
+F4_a3_4 = S(1:R3, 1:R3) * V(:, 1:R3)';
+G4 = F4_a3_4;
+
+# Получаем искомые G1, G2, G3, G4
